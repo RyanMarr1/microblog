@@ -373,7 +373,6 @@ function addPost(title, content, user) {
     }
     posts.push(newPost);   
 }
-
 // Function to generate an image avatar
 function generateAvatar(letter, width = 100, height = 100) {
     // TODO: Generate an avatar image with a letter
@@ -383,6 +382,7 @@ function generateAvatar(letter, width = 100, height = 100) {
     // 3. Draw the background color
     // 4. Draw the letter in the center
     // 5. Return the avatar as a PNG buffer
+    const { createCanvas } = require('canvas');
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
 
