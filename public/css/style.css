@@ -19,6 +19,16 @@ body{
   background-color: antiquewhite;
 }
 
+h1{
+	font-size: 20pt;
+	font-weight: bolder;
+}
+
+h2{
+	font-size: 16pt;
+	font-weight: bold;
+}
+
 .logo{
   display: flex;
   flex-direction: row;
@@ -106,4 +116,44 @@ form {
 		#2b692f
 	); 
 	transform: scale(1.05); 
+}
+
+.posts-list{
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin-top: 20px;
+	gap: 20px;
+}
+
+.post{
+	display: flex;
+	flex-direction: row;
+	background-color: #fff;
+	width: 700px;
+	border-radius: 8px;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	margin-bottom: 40px ;
+}
+
+.post-avatar{
+	width: 10%;
+	height: 10%;
+}
+
+.post-content{
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.preserve-newlines{
+	white-space: pre-line;
+}
+
+.post-status-bar{
+	border-top: grey;
+	display: flex;
+	flex-direction: row;
+	gap: 20px;
 }

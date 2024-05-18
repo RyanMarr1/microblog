@@ -26,7 +26,7 @@
 
     <section class="posts-list">
         <!-- recent posts -->
-
+        <h1>Recent Posts</h1>
         {{#if posts.length}}
         <ul>
             {{#each posts}}
@@ -36,6 +36,7 @@
         </ul>
         {{else}}
             <!-- no posts, oh no, what now? -->
+            <p>No posts available. Be the first to post!</p>
         {{/if}}
     </section>
 </section>
