@@ -2,18 +2,27 @@
 <div class="post">
     <div class="post-avatar">
         <!-- the user's avatar -->
-        <img src="avatar/{{username}}" alt="{{username}}'s avatar" />
+        <img src="avatar/{{username}}" alt="{{username}}'s avatar" class="pfp-home"/>
     </div>
     <div class="post-content preserve-newlines">
         <!-- the post -->
             <h2>{{title}}</h2>
             <p>{{content}}</p>
+        <hr>
         <div class="post-status-bar">
             <!-- everything that is shown in the status bar -->
             <!-- Heart = ♥ -->
             <!-- font awesome  trashcan = <i class="fas fa-trash-alt"> </i>-->
-            <span>♥</span>
-            <span>{{likes}} likes</span>
+            {{#ifCond user.username username}}
+                <span>
+                    <a href="#" onclick="handleDeleteClick(event)" data-id="{{id}}">🗑</a>
+                </span>
+            {{else}}
+                <span>
+                    <a href="#" onclick="handleLikeClick(event)" data-id="{{id}}">♥</a>
+                </span>
+            {{/ifCond}}
+            <span id="like-count">{{likes}} likes</span>
             <small>Posted by {{username}} on {{timestamp}}</small>
         </div>        
     </div>
@@ -23,14 +32,42 @@
     function handleLikeClick(event) {
         const postId = event.target.getAttribute('data-id');
 
-        // you might want to "fetch" something...        
+
+        // you might want to "fetch" something...  
+
+        fetch(`/like/${postId}`, {
+            method: 'POST',
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+        })
+        .then(message => {
+            console.log(message); 
+        })
+        .catch(error => {
+            console.error('Error updating post likes:', error);
+        });  
     }
 
     function handleDeleteClick(event) {
-        const buttonElement = event.target.closest('.delete-button');
-        const postId = buttonElement.getAttribute('data-id');        
+        const postId = event.target.getAttribute('data-id'); 
 
         // you might want to "fetch" something...        
-        
+        fetch(`/delete/${postId}`, {
+            method: 'POST',
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+        })
+        .then(message => {
+            console.log(message); // Log the response message
+        })
+        .catch(error => {
+            console.error('Error deleting post:', error);
+        });
     }    
 </script>

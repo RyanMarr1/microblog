@@ -121,13 +121,8 @@ app.get('/error', (req, res) => {
 
 // Additional routes that you must implement
 
-
-app.get('/post/:id', (req, res) => {
-    // TODO: Render post detail page
-});
 app.post('/posts', (req, res) => {
     // TODO: Add a new post and redirect to home
-    
     const title = req.body.title;
     const content = req.body.content;
     const user = getCurrentUser(req);
@@ -136,7 +131,7 @@ app.post('/posts', (req, res) => {
 });
 app.post('/like/:id', (req, res) => {
     // TODO: Update post likes
-    updatePostLikes();
+    updatePostLikes(req, res);
 });
 app.get('/profile', isAuthenticated, (req, res) => {
     // TODO: Render profile page
@@ -144,27 +139,14 @@ app.get('/profile', isAuthenticated, (req, res) => {
 });
 app.get('/avatar/:username', (req, res) => {
     // TODO: Serve the avatar image for the user
-    console.log(`Generating avatar for username: ${req.params.username}`);
-    const username = req.params.username;
-    const letter = username.charAt(0).toUpperCase();
-    const avatar = generateAvatar(letter);
-    res.set('Content-Type', 'image/png');
-    res.send(avatar);
+    handleAvatar(req,res);
 });
 app.post('/register', (req, res) => {
     registerUser(req, res);
 });
 app.post('/login', (req, res) => {
     // TODO: Login a user
-    loginUser(req, res); // login validation
-
-    req.session.regenerate((err) => {
-        if (err) {
-            return res.status(500)
-                        .send('Failed to regenerate session');
-        }
-        res.send('Logged in successfully');
-    })
+    loginUser(req, res);
 });
 app.get('/logout', (req, res) => {
     logoutUser(req, res);
@@ -176,9 +158,11 @@ app.post('/delete/:id', isAuthenticated, (req, res) => {
     const postToDelete = posts.findIndex(post => post.id === postId); // -1 if not found
 
     if (postToDelete !== -1) {
-        if (posts[postIndex].id === user.id) {
-            posts.splice(postIndex, 1);
+        if (posts[postToDelete].username === user.username) {
+            posts.splice(postToDelete, 1);
             res.send('Post successfully deleted');
+        } else {
+            res.send('You are not allowed to delete other users\' posts');
         }
     } else {
         res.status(404).send('Post not found');
@@ -259,7 +243,6 @@ function registerUser(req, res) {
     const username = req.body.username;
     console.log("Attempting to register:", username);
     if (findUserByUsername(username)) {
-        // Username already exists
         res.redirect('/register?error=Username+already+exists');
     } else {
         addUser(username);
@@ -273,13 +256,17 @@ function loginUser(req, res) {
     const username = req.body.username;
     const user = findUserByUsername(username);
     console.log("Attempting to login:", username);
-    if (user) {
-        // Successful login
-        req.session.userId = user.id;
-        req.session.loggedIn = true;
-        res.redirect('/'); // redirect to home page upon login
+    if (user) { // successful login
+        req.session.regenerate((err) => {
+            if (err) {
+                console.error('Session regeneration error:', err);
+                return res.status(500).send('Failed to regenerate session');
+            }
+            req.session.userId = user.id;
+            req.session.loggedIn = true;
+            res.redirect('/'); // redirect to home page upon login
+        });
     } else {
-        // Invalid username
         res.redirect('/login?error=Invalid+username');
     }
 }
@@ -290,10 +277,10 @@ function logoutUser(req, res) {
     req.session.destroy(err => {
         if (err) {
             console.error('Error destroying session:', err);
-            res.redirect('/error'); // Redirect to an error page
+            res.redirect('/error'); // redirect to error page
         } else {
             res.clearCookie('sessionId');
-            res.redirect('/'); // Redirect to the home page after successful logout
+            res.redirect('/'); // redirect to home page
         }
     });
 }
@@ -301,9 +288,10 @@ function logoutUser(req, res) {
 // Function to render the profile page
 function renderProfile(req, res) {
     // TODO: Fetch user posts and render the profile page
-    const currentUser = getCurrentUser(req); // fetch user based on req
-    if (currentUser) {
-        
+    const currUser = getCurrentUser(req); // fetch user based on req
+    if (currUser) {
+        const userPosts = posts.filter(post => post.username == currUser.username).slice().reverse();
+        res.render('profile', { posts: userPosts, user: currUser });
     } else {
         res.redirect('/login');
     }
@@ -314,15 +302,12 @@ function updatePostLikes(req, res) {
     // TODO: Increment post likes if conditions are met
     const postId = parseInt(req.params.id);
     const user = getCurrentUser(req);
-    const post = posts.find(post => post.id === postId);
+    const post = posts.find(post => post.id == postId);
     if (post) { 
         if (post.username !== user.username) {
-            // If the current user is not the owner, increment likes
             post.likes++;
-            return res.send('Post successfully liked');
         }
     } else {
-        // If the post does not exist, send a not found response
         return res.status(404).send('Post not found');
     }
 }

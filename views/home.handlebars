@@ -7,10 +7,17 @@
         <!-- show the create post form when logged in -->
         <section class="post-form">
             <!-- make a header here -->
+            <h1>Create a new post</h1>
             <form action="/posts" method="POST">
                 <!-- title input field name = "title" -->
                 <!-- text area input field name = "content" -->
-
+                <div class="input-group">
+                    <input type="text" id="title" name="title" placeholder="Title" required>
+                </div>
+                <!-- text area input field name = "content" -->
+                <div class="input-group">
+                    <textarea id="content" name="content" rows="13" placeholder="What's on your mind?" required></textarea>
+                </div>
                 <div class="form-actions">
                     <button type="button" class="emoji-button" onclick="toggleEmojiPanel()">😀</button>
                     <button type="submit" class="post-button">Post</button>
@@ -20,6 +27,8 @@
             <div id="emoji-container" class="emoji-panel" style="display: none;">
                 <!-- input field for the emoji search, use oninput="searchEmojis() -->
                 <!-- a div, id = "emoji-grid" -->
+                <input type="text" id="emoji-search" placeholder="Enter emoji name" oninput="searchEmojis()">
+                <div id="emoji-grid"></div>
             </div>
         </section>
     {{/if}}
@@ -55,12 +64,20 @@
 let allEmojis = [];  // Global list to hold all emojis
 
 function toggleEmojiPanel() {
+    console.log("EMoji panel toggled");
     const container = document.getElementById('emoji-container');
     container.style.display = container.style.display === 'none' ? 'block' : 'none';
 
 
     if(container.style.display === 'block' && allEmojis.length == 0){
         // go "Fetch" you some emojis and show them off with displayEmojies
+        fetch('https://emoji-api.com/emojis?access_key=3a39b6796649385fe9cec696d14846938a231afe')  // Replace with your actual API endpoint and key
+        .then(response => response.json())
+        .then(data => {
+            allEmojis = data;
+            displayEmojis(allEmojis);
+        })
+        .catch(error => console.error('Error fetching emojis:', error));
     }
 }
 
@@ -86,7 +103,9 @@ function searchEmojis() {
     // array.filter takes a predicate
     // use string.includes. 
 
-    const filteredEmojis = allEmojis.filter(...);
+    const filteredEmojis = allEmojis.filter(emoji => 
+        emoji.slug.includes(searchTerm)
+    );
     
     displayEmojis(filteredEmojis);
 }
@@ -96,7 +115,15 @@ function insertEmoji(emoji) {
 
     // do this when you're doing getting the emoji on the form
     //
-    textarea.focus();  // Keep focus on the textarea
+    // Find the textarea and insert the emoji at the cursor position
+    const textarea = document.getElementById('content');
+    const startPos = textarea.selectionStart;
+    const endPos = textarea.selectionEnd;
+
+    textarea.value = textarea.value.substring(0, startPos) + emoji + textarea.value.substring(endPos, textarea.value.length);
+
+    textarea.focus();// Keep focus on the textarea
+    textarea.setSelectionRange(startPos + emoji.length, startPos + emoji.length);
 }
 </script>
 

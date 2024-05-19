@@ -4,10 +4,14 @@
 <div class="profile-container">
     <div class="profile-avatar">
         <!-- Correct path for the default avatar image -->
+        <img src="avatar/{{user.username}}" alt="{{user.username}}'s avatar" class="pfp"/>
     </div>
     
     <section class="profile-info">
         <!-- user profile info -->
+        <h1>User Profile<h1>
+        <p> Username: {{user.username}}</p>
+        <p> Member Since: {{user.memberSince}}</p>
     </section>
 </div>
 
@@ -16,10 +20,10 @@
     <h2>Your {{{postNeoType}}}s</h2>
     
     <!-- you'll need to make this conditaionl and #each expression work -->
-    {{#if user.posts.length}}
+    {{#if posts.length}}
         <ul>
-            {{#each user.posts}}
-                {{> post this}}
+            {{#each posts}}
+                {{> post this user=../user}}
             {{/each}}
         </ul>
     {{else}}
