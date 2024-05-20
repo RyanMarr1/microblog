@@ -71,7 +71,7 @@ function toggleEmojiPanel() {
 
     if(container.style.display === 'block' && allEmojis.length == 0){
         // go "Fetch" you some emojis and show them off with displayEmojies
-        fetch('https://emoji-api.com/emojis?access_key=3a39b6796649385fe9cec696d14846938a231afe')  // Replace with your actual API endpoint and key
+        fetch('https://emoji-api.com/emojis?access_key=3a39b6796649385fe9cec696d14846938a231afe')
         .then(response => response.json())
         .then(data => {
             allEmojis = data;
@@ -83,12 +83,12 @@ function toggleEmojiPanel() {
 
 function displayEmojis(emojis,limit=200) {
     const container = document.getElementById('emoji-grid');
-    container.innerHTML = '';  // Clear previous results
+    container.innerHTML = '';
     if (Array.isArray(emojis) && emojis.length > 0) {
         emojis.slice(0, limit).forEach(emoji => {
             const emojiElement = document.createElement('span');
             emojiElement.textContent = emoji.character;
-            emojiElement.title = emoji.slug;  // Showing the emoji name on hover
+            emojiElement.title = emoji.slug;
             emojiElement.style.cursor = 'pointer';
             emojiElement.onclick = () => insertEmoji(emoji.character);
             container.appendChild(emojiElement);
@@ -122,7 +122,7 @@ function insertEmoji(emoji) {
 
     textarea.value = textarea.value.substring(0, startPos) + emoji + textarea.value.substring(endPos, textarea.value.length);
 
-    textarea.focus();// Keep focus on the textarea
+    textarea.focus();
     textarea.setSelectionRange(startPos + emoji.length, startPos + emoji.length);
 }
 </script>

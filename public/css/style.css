@@ -6,13 +6,14 @@ header {
   position: relative;
   margin: -20px;
   padding: 0 20px;
+	padding-top: 10px;
 }
 
 footer{
   text-align: center;
   position: relative;
   bottom: 0;
-	margin-top: 200px;
+	margin-top: 10%;
   width: 100%;
 }
 
@@ -22,9 +23,8 @@ body{
 }
 
 hr {
-  /* Styles for the line */
-  border: 1px solid #896767; /* Example line style */
-  margin: 10px 0;  /* Adjust margin for spacing above and below */
+  border: 1px solid #896767;
+  margin: 10px 0;
 	margin-bottom: 2px;
 }
 
@@ -60,18 +60,20 @@ nav{
 	font-weight: bold;
 }
 
-
-.header-avatar{
+.user-info{
 	width: auto;
-	height: auto;
-  border-radius: 5px;
 }
 
+.header-avatar{
+	max-width: 60px;
+  border-radius: 5px;
+}
 
 .logo{
   display: flex;
   flex-direction: row;
   align-items: center;
+	gap:10px;
 }
 
 .pfp-home{
@@ -80,8 +82,7 @@ nav{
 }
 
 .header-logo{
-  max-height: 70%;
-  max-width: 7%;
+  max-width: 60px;
   border-radius: 5px;
 }
 
@@ -101,10 +102,7 @@ nav{
 	gap: 10px;
 	max-width: 500px;
 	margin: 40px;
-	padding-left: 50px;
-	padding-right: 50px;
-	padding-top: 150px;
-	padding-bottom: 150px;
+	padding: 150px 50px;
 	background-color: #ffffff;
 	border-radius: 8px;
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -117,13 +115,15 @@ nav{
 	gap: 10px;
 	max-width: 500px;
 	margin: 40px;
-	padding-left: 50px;
-	padding-right: 50px;
-	padding-top: 150px;
-	padding-bottom: 150px;
+	padding: 150px 50px;
 	background-color: #ffffff;
 	border-radius: 8px;
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#registered{
+	color: blue;
+	display: none;
 }
 
 form {
@@ -291,11 +291,13 @@ form {
 }
 
 .profile-info h1{
+	white-space: nowrap;
 	font-size: 18pt;
 	font-weight: bolder;
 }
 
 .profile-info p{
+	white-space: nowrap;
 	font-size: 12pt;
 	font-weight: lighter;
 }
@@ -319,5 +321,48 @@ form {
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
+	}
+
+	.login-register{
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.login-area{
+		margin:0;
+		margin-top:30px;
+		padding: 80px 50px;
+	}
+
+	.register-area{
+		margin:0;
+		padding: 80px 50px;
+	}
+
+	.profile-container{
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		margin: 30px 0;
+		gap: 40px;
+	}
+
+	.profile-avatar{
+		width: 20%;
+		height: auto;
+		margin: auto;
+	}
+
+	.profile-info{
+		border: 1px solid black;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		background-color: white;
+		border-radius: 8px;
+		box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 	}
 }

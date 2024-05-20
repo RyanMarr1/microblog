@@ -129,7 +129,7 @@ app.post('/posts', (req, res) => {
     addPost(title, content, user);
     res.redirect('/');
 });
-app.post('/like/:id', (req, res) => {
+app.post('/like/:id', isAuthenticated, (req, res) => {
     // TODO: Update post likes
     updatePostLikes(req, res);
 });
@@ -222,9 +222,6 @@ function addUser(username) {
         memberSince: memberDate
     };
     users.push(newUser);
-
-    console.log(newUser);
-    console.log(users);
 }
 
 // Middleware to check if user is authenticated
@@ -361,26 +358,18 @@ function addPost(title, content, user) {
 // Function to generate an image avatar
 function generateAvatar(letter, width = 100, height = 100) {
     // TODO: Generate an avatar image with a letter
-    // Steps:
-    // 1. Choose a color scheme based on the letter
-    // 2. Create a canvas with the specified width and height
-    // 3. Draw the background color
-    // 4. Draw the letter in the center
-    // 5. Return the avatar as a PNG buffer
+    
     const { createCanvas } = require('canvas');
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
 
-    // Choose a background color based on the letter (you can customize this)
     const colors = ['#FF5733', '#33FF57', '#3357FF', '#FF33A1', '#FF9933'];
     const color = colors[letter.charCodeAt(0) % colors.length];
     
-    // Draw background
     ctx.fillStyle = color;
     ctx.fillRect(0, 0, width, height);
 
-    // Draw letter
-    ctx.fillStyle = '#FFFFFF'; // White text color
+    ctx.fillStyle = '#FFFFFF';
     ctx.font = `${width * 0.6}px sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';

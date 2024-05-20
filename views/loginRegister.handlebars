@@ -24,14 +24,23 @@
         <!-- errors will appear here -->
         {{#if regError}}
             <p style="color: red;">{{regError}}</p>
+        {{else}}
+            <p id="registered">Succesfully Registered!</p>
         {{/if}}
+        {{!-- <p id="registered" style = "color: blue;"></p> --}}
         <form action="/register" method="POST">
             <!-- the registration form goes here -->
             <label for="username">Username:</label>
             <input type="text" id="username" name="username" placeholder="username" pattern="[A-Za-z0-9]{5,}" required
                 oninvalid="this.setCustomValidity('Username must be at least 5 characters long\n and must not contain special characters (ex. !@#$%^&*)')"
                 oninput="this.setCustomValidity('')">
-            <button class = "reglogbutton">Register</button>
+            <button class = "reglogbutton" onclick="handleRegister()">Register</button>
         </form>
     </section>
 </section>
+
+<script>
+    function handleRegister() {
+        document.getElementById("registered").style.display = "block";
+    }
+</script>

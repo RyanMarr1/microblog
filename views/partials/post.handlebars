@@ -19,10 +19,12 @@
                 </span>
             {{else}}
                 <span>
-                    <a href="#" onclick="handleLikeClick(event)" data-id="{{id}}">♥</a>
+                    <a href="#" onclick="handleLikeClick(event)" data-id="{{id}}" data-likes="{{likes}}" data-currUser="{{user.username}}">♥</a>
                 </span>
             {{/ifCond}}
-            <span id="like-count">{{likes}} likes</span>
+            <div id="likeDiv">
+                <span id="like-count">{{likes}}</span> <span> likes</span>
+            </div>
             <small>Posted by {{username}} on {{timestamp}}</small>
         </div>        
     </div>
@@ -31,8 +33,12 @@
 
     function handleLikeClick(event) {
         const postId = event.target.getAttribute('data-id');
+        const currUser = event.target.getAttribute('data-currUser');
 
-
+        if(currUser == '') {
+            console.error("non logged in users aren't able to like posts");
+            return;
+        }
         // you might want to "fetch" something...  
 
         fetch(`/like/${postId}`, {
@@ -48,7 +54,16 @@
         })
         .catch(error => {
             console.error('Error updating post likes:', error);
-        });  
+        });
+
+        const container = event.target.closest(".post");
+        if (container) {
+            const likeCountSpan = container.querySelector("#like-count");
+            if (likeCountSpan) {
+                likeCountSpan.innerText = (parseInt(likeCountSpan.innerText) + 1);
+            }
+        }
+
     }
 
     function handleDeleteClick(event) {
@@ -64,10 +79,16 @@
             }
         })
         .then(message => {
-            console.log(message); // Log the response message
+            console.log(message);
         })
         .catch(error => {
             console.error('Error deleting post:', error);
         });
+
+        const postContainer = event.target.closest(".post");
+        if (postContainer) {
+            postContainer.style.display = 'none';
+        }
+
     }    
 </script>
