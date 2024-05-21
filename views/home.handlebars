@@ -19,7 +19,7 @@
                     <textarea id="content" name="content" rows="13" placeholder="What's on your mind?" required></textarea>
                 </div>
                 <div class="form-actions">
-                    <button type="button" class="emoji-button" onclick="toggleEmojiPanel()">😀</button>
+                    <button type="button" class="emoji-button" onclick="toggleEmojiPanel()" data-apiKey="{{apikey}}">😀</button>
                     <button type="submit" class="post-button">Post</button>
                 </div>
             </form>
@@ -62,16 +62,15 @@
 */
 
 let allEmojis = [];  // Global list to hold all emojis
-
 function toggleEmojiPanel() {
-    console.log("EMoji panel toggled");
     const container = document.getElementById('emoji-container');
     container.style.display = container.style.display === 'none' ? 'block' : 'none';
+    const apiKey = event.target.getAttribute('data-apiKey');
 
 
     if(container.style.display === 'block' && allEmojis.length == 0){
         // go "Fetch" you some emojis and show them off with displayEmojies
-        fetch('https://emoji-api.com/emojis?access_key=3a39b6796649385fe9cec696d14846938a231afe')
+        fetch('https://emoji-api.com/emojis?access_key=' + apiKey)
         .then(response => response.json())
         .then(data => {
             allEmojis = data;
