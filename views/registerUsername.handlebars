@@ -1,0 +1,29 @@
+{{! Use the main layout }}
+{{!< main }}
+
+<section class="login-register">
+    <section class = "register-area">
+        <h2>Register</h2>
+        <!-- errors will appear here -->
+        {{#if regError}}
+            <p style="color: red;">{{regError}}</p>
+        {{else}}
+            <p id="registered">Succesfully Registered!</p>
+        {{/if}}
+        {{!-- <p id="registered" style = "color: blue;"></p> --}}
+        <form action="/registerUsername" method="POST">
+            <!-- the registration form goes here -->
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" placeholder="username" pattern="[A-Za-z0-9]{5,}" required
+                oninvalid="this.setCustomValidity('Username must be at least 5 characters long\n and must not contain special characters (ex. !@#$%^&*)')"
+                oninput="this.setCustomValidity('')">
+            <button class = "reglogbutton" onclick="handleRegister()">Register</button>
+        </form>
+    </section>
+</section>
+
+<script>
+    function handleRegister() {
+        document.getElementById("registered").style.display = "block";
+    }
+</script>

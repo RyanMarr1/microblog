@@ -35,7 +35,17 @@
 
     <section class="posts-list">
         <!-- recent posts -->
-        <h1>Recent Posts</h1>
+        <div class = "posts-nav">
+            <h1>Recent Posts</h1>
+            <div class="dropdown">
+                <button class="dropbtn">Sort</button>
+                <div class="dropdown-content">
+                    <a href="sort-likes">Most Likes</a>
+                    <a href="/">Most Recent</a>
+                </div>
+            </div>
+        </div>
+        
         {{#if posts.length}}
         <ul>
             {{#each posts}}
