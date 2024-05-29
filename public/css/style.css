@@ -121,11 +121,6 @@ nav{
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-#registered{
-	color: blue;
-	display: none;
-}
-
 form {
   display: flex;
   flex-direction: column;

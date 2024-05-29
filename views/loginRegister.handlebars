@@ -7,43 +7,6 @@
         <a href="/auth/google" class="reglogbutton">Sign In with Google</a>
     </section>
 </section>
-<section class="login-register">
-    <section class = "login-area">
-        <h2>Login</h2>
-        <!-- errors will appear here -->
-        {{#if loginError}}
-            <p style="color: red;">{{loginError}}</p>
-        {{/if}}
-        <form action="/login" method="POST">
-            <!-- the login form goes here -->
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" placeholder="username" pattern="[A-Za-z0-9]{5,}" required>
-            <button class = "reglogbutton">Login</button>
-        </form>
-    </section>
-
-    <!-- say --OR-- ... with style -->
-    <p id = "or">--OR--</p>
-
-    <section class = "register-area">
-        <h2>Register</h2>
-        <!-- errors will appear here -->
-        {{#if regError}}
-            <p style="color: red;">{{regError}}</p>
-        {{else}}
-            <p id="registered">Succesfully Registered!</p>
-        {{/if}}
-        {{!-- <p id="registered" style = "color: blue;"></p> --}}
-        <form action="/register" method="POST">
-            <!-- the registration form goes here -->
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" placeholder="username" pattern="[A-Za-z0-9]{5,}" required
-                oninvalid="this.setCustomValidity('Username must be at least 5 characters long\n and must not contain special characters (ex. !@#$%^&*)')"
-                oninput="this.setCustomValidity('')">
-            <button class = "reglogbutton" onclick="handleRegister()">Register</button>
-        </form>
-    </section>
-</section>
 
 <script>
     function handleRegister() {

@@ -9,10 +9,10 @@ const dbFileName = 'your_database_file.db';
 async function initializeDB() {
     const db = await sqlite.open({ filename: dbFileName, driver: sqlite3.Database });
 
-    await db.exec(`
-      DELETE FROM users;
-      DELETE FROM posts;
-    `);
+    // await db.exec(`
+    //   DELETE FROM users;
+    //   DELETE FROM posts;
+    // `);
 
     await db.exec(`
         CREATE TABLE IF NOT EXISTS users (
@@ -29,7 +29,8 @@ async function initializeDB() {
             content TEXT NOT NULL,
             username TEXT NOT NULL,
             timestamp DATETIME NOT NULL,
-            likes INTEGER NOT NULL
+            likes INTEGER NOT NULL,
+            likedBy TEXT DEFAULT '[]'
         );
     `);
 
@@ -40,10 +41,8 @@ async function initializeDB() {
     ];
   
     const posts = [
-        { title: 'First Post', content: 'This is the first post', username: 'user1', timestamp: '2024-01-01 12:30:00', likes: 0 },
-        { title: 'Second Post', content: 'This is the second post', username: 'user2', timestamp: '2024-01-02 12:30:00', likes: 5 },
-        { title: 'Third Post', content: 'This is the second post', username: 'user23', timestamp: '2024-01-02 17:30:00', likes: 2 },
-        { title: 'Fourth Post', content: 'This is the second post', username: 'user64', timestamp: '2024-01-02 14:30:00', likes: 6 }
+        { title: 'First Post', content: 'This is the first post', username: 'user1', timestamp: '2024-01-01 12:30:00', likes: 0 , likedBy: '[]'  },
+        { title: 'Second Post', content: 'This is the second post', username: 'user2', timestamp: '2024-01-02 12:30:00', likes: 0 , likedBy: '[]' },
     ];
 
     // Insert sample data into the database
@@ -56,8 +55,8 @@ async function initializeDB() {
 
     await Promise.all(posts.map(post => {
         return db.run(
-            'INSERT INTO posts (title, content, username, timestamp, likes) VALUES (?, ?, ?, ?, ?)',
-            [post.title, post.content, post.username, post.timestamp, post.likes]
+            'INSERT INTO posts (title, content, username, timestamp, likes, likedBy) VALUES (?, ?, ?, ?, ?, ?)',
+            [post.title, post.content, post.username, post.timestamp, post.likes, post.likedBy]
         );
     }));
 
@@ -65,8 +64,8 @@ async function initializeDB() {
     await db.close();
 }
 
-initializeDB().catch(err => {
-    console.error('Error initializing database:', err);
-});
+// initializeDB().catch(err => {
+//     console.error('Error initializing database:', err);
+// });
 
 module.exports =  { initializeDB };
