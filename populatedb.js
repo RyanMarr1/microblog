@@ -20,7 +20,8 @@ async function initializeDB() {
             username TEXT NOT NULL UNIQUE,
             hashedGoogleId TEXT NOT NULL UNIQUE,
             avatar_url TEXT,
-            memberSince DATETIME NOT NULL
+            memberSince DATETIME NOT NULL,
+            bio TEXT
         );
 
         CREATE TABLE IF NOT EXISTS posts (
@@ -32,17 +33,31 @@ async function initializeDB() {
             likes INTEGER NOT NULL,
             likedBy TEXT DEFAULT '[]'
         );
+        
+        CREATE TABLE IF NOT EXISTS replies (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            content TEXT NOT NULL,
+            username TEXT NOT NULL,
+            repliedToId INTEGER NOT NULL,
+            timestamp DATETIME NOT NULL,
+            FOREIGN KEY(repliedToId) REFERENCES posts(id) ON DELETE CASCADE
+        );
     `);
 
     // Sample data - Replace these arrays with your own data
     const users = [
-      { username: 'SampleUserr', hashedGoogleId: '8d945a9691fae136b71eea807c440005ebecba389c5bc', avatar_url: '', memberSince: '2024-01-01 12:00:00' },
-      { username: 'AnotherUserr', hashedGoogleId: '9a845a9791fae136b71eea807c440005ebecba389c5b', avatar_url: '', memberSince: '2024-01-02 12:00:00' }
+      { username: 'SampleUser', hashedGoogleId: '8d945a9691fae136b71eea807c440005ebecba389c5bc', avatar_url: '', memberSince: '2024-01-01 12:00:00'},
+      { username: 'AnotherUser', hashedGoogleId: '9a845a9791fae136b71eea807c440005ebecba389c5b', avatar_url: '', memberSince: '2024-01-02 12:00:00'}
     ];
   
     const posts = [
-        { title: 'First Post', content: 'This is the first post', username: 'user1', timestamp: '2024-01-01 12:30:00', likes: 0 , likedBy: '[]'  },
-        { title: 'Second Post', content: 'This is the second post', username: 'user2', timestamp: '2024-01-02 12:30:00', likes: 0 , likedBy: '[]' },
+        { title: 'First Post', content: 'This is the first post', username: 'SampleUser', timestamp: '2024-01-01 12:30:00', likes: 0 , likedBy: '[]' },
+        { title: 'Second Post', content: 'This is the second post', username: 'AnotherUser', timestamp: '2024-01-02 12:30:00', likes: 0 , likedBy: '[]' },
+    ];
+
+    const replies = [
+        { content: 'First reply to first post', username: 'AnotherUser', repliedToId: 1, timestamp: '2024-01-01 13:00:00' },
+        { content: 'Second reply to first post', username: 'SampleUser', repliedToId: 1, timestamp: '2024-01-01 13:05:00' }
     ];
 
     // Insert sample data into the database
@@ -57,6 +72,13 @@ async function initializeDB() {
         return db.run(
             'INSERT INTO posts (title, content, username, timestamp, likes, likedBy) VALUES (?, ?, ?, ?, ?, ?)',
             [post.title, post.content, post.username, post.timestamp, post.likes, post.likedBy]
+        );
+    }));
+
+    await Promise.all(replies.map(reply => {
+        return db.run(
+            'INSERT INTO replies (content, username, repliedToId, timestamp) VALUES (?, ?, ?, ?)',
+            [reply.content, reply.username, reply.repliedToId, reply.timestamp]
         );
     }));
 

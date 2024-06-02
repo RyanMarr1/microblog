@@ -10,6 +10,11 @@ const accessToken = process.env.EMOJI_API_KEY;
 const { initializeDB } = require('./populatedb');
 const sqlite = require('sqlite');
 const sqlite3 = require('sqlite3');
+const { readdirSync } = require('fs');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+const sharp = require('sharp');
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Configuration and Setup
@@ -161,6 +166,112 @@ app.get('/', async (req, res) => {
     res.render('home', { posts, user, apikey: accessToken});
 });
 
+app.post('/deleteReply/:id', isAuthenticated, async (req, res) => {
+    // TODO: Delete a reply if the current user is the owner
+    const user = await getCurrentUser(req) || {}; // get current user
+    const replyId = parseInt(req.params.id); // get post id from url
+    
+    try {
+        const replyToDelete = await db.get('SELECT * FROM replies WHERE id = ?', [replyId]);
+
+        if (!replyToDelete) { // if reply doesn't exist
+            return res.status(404).send('Reply not found');
+        }
+
+        if (replyToDelete.username !== user.username) { // safeguard against deleting others replies
+            return res.status(403).send('You are not allowed to delete other users\' posts');
+        }
+
+        await db.run('DELETE FROM replies WHERE id = ?', [replyId]); // delete from database
+        res.send('Reply successfully deleted');
+    } catch (error) {
+        console.error('Error deleting reply:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+app.post('/postReply',async (req, res) => {
+    //TODO: Add a new reply and redirect to home
+
+    const title = req.body.title;
+    const content = req.body.content;
+    const user = await getCurrentUser(req);
+    const postId = req.body.postId;
+
+    if (user) {
+        await addReply(content, user, postId);
+        res.redirect('/');
+    } else {
+        res.redirect('/login');
+    }
+});
+
+// Function to add a new reply
+async function addReply(content, user, postId) {    
+    // TODO: Create a new reply object and add to reply array
+    const currentDate = new Date();
+    const year = currentDate.getFullYear();
+    const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+    const day = String(currentDate.getDate()).padStart(2, '0');
+    const hours = String(currentDate.getHours()).padStart(2, '0');
+    const minutes = String(currentDate.getMinutes()).padStart(2, '0');
+    const seconds = String(currentDate.getSeconds()).padStart(2, '0');
+    const timestamp = year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
+    
+    try {
+        await db.run('INSERT INTO replies (content, username, repliedToId, timestamp) VALUES (?, ?, ?, ?)', [content, user.username, postId, timestamp]);
+        console.log('reply added to database.');
+    } catch (error) {
+        console.error('Error adding reply to database:', error);
+    }
+}
+
+// Function to update user profile
+async function updateUserProfile(req, res) {
+    try {
+        const oldUser = await findUserById(req.session.userId);
+        const oldUsername = oldUser.username;
+        console.log("old user name is " + oldUsername);
+        const newUsername = req.body.username;
+        req.session.username = newUsername;
+        const newBio = req.body.bio;
+        const existingUser = await findUserByUsername(newUsername);
+        if (existingUser && existingUser.username != oldUsername) { // allows keeping old username
+            return res.redirect('/profile?error=Username+already+exists');
+        }
+
+        //await db.run('UPDATE users SET username = ?, avatar_url = ?, bio = ? WHERE id = ?', [newUsername, newAvatarUrl, newBio, req.session.userId]);
+        await db.run('UPDATE users SET username = ?, bio = ? WHERE id = ?', [newUsername, newBio, req.session.userId]);
+        await db.run('UPDATE posts SET username = ? WHERE username = ?', [newUsername, oldUsername]);
+        await db.run('UPDATE replies SET username = ? WHERE username = ?', [newUsername, oldUsername]);
+        res.redirect('/profile');
+    } catch (error) {
+        res.redirect('/error');
+    }
+}
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const uploadPath = path.join(__dirname, 'public', 'avatars');
+        if (!fs.existsSync(uploadPath)) {
+            fs.mkdirSync(uploadPath, { recursive: true });
+        }
+        cb(null, uploadPath);
+    },
+    filename: function (req, file, cb) {
+        const userId = req.session.userId;
+        const ext = path.extname(file.originalname);
+        cb(null, `${userId}${ext}`);
+    }
+});
+
+const upload = multer({ storage: storage });
+
+// Profile update route
+app.post('/profile', isAuthenticated, async (req, res) => {
+    updateUserProfile(req, res);
+});
+
 app.get('/sort-likes', async (req, res) => {
     const posts = await getPostsSortedByLikes();
     const user = await getCurrentUser(req) || {};
@@ -243,13 +354,40 @@ app.post('/like/:id', isAuthenticated, (req, res) => {
     // TODO: Update post likes
     updatePostLikes(req, res);
 });
-app.get('/profile', isAuthenticated, (req, res) => {
+app.get('/profile', isAuthenticated, async (req, res) => {
     // TODO: Render profile page
-    renderProfile(req, res);
+    const regError = req.query.error || '';
+    await renderProfile(req, res, regError);
 });
-app.get('/avatar/:username', (req, res) => {
+app.get('/avatar/:username',async (req, res) => {
     // TODO: Serve the avatar image for the user
-    handleAvatar(req,res);
+    await handleAvatar(req,res);
+});
+app.post('/profile/avatar', isAuthenticated, upload.single('myImage'), async (req, res) => {
+    const userId = req.session.userId;
+    // const filePath = `/avatars/${req.file.filename}`;
+    const uploadPath = path.join(__dirname, 'public', 'avatars');
+    const inputFilePath = req.file.path; // Input file path
+    const outputFilePath = path.join(uploadPath, `${userId}.png`); // Output file path
+    
+    try {
+        await sharp(inputFilePath)
+            .rotate()
+            .resize({
+                fit: 'cover',
+                width: 100,
+                height: 100,
+            })
+            .toFile(outputFilePath); // Save the resized image to the output file
+
+        // Update the database with the new avatar URL
+        const filePath = `/avatars/${userId}.png`;
+        await db.run('UPDATE users SET avatar_url = ? WHERE id = ?', [filePath, userId]);
+        res.redirect('/profile');
+    } catch (error) {
+        console.error('Error updating avatar:', error);
+        res.redirect('/error');
+    }
 });
 app.post('/registerUsername', (req, res) => {
     registerUsername(req, res);
@@ -341,8 +479,8 @@ async function addUser(username, req) {
 
     try {
         await db.run(
-            'INSERT INTO users (username, hashedGoogleId, avatar_url, memberSince) VALUES (?, ?, ?, ?)',
-            [username, googleId, `/avatar/${username}`, memberDate]
+            'INSERT INTO users (username, hashedGoogleId, memberSince) VALUES (?, ?, ?)',
+            [username, googleId, memberDate]
         );
     } catch (error) {
         console.error('Error adding user to database:', error);
@@ -396,13 +534,17 @@ function logoutUser(req, res) {
 }
 
 // Function to render the profile page
-async function renderProfile(req, res) {
+async function renderProfile(req, res, regError) {
     // TODO: Fetch user posts and render the profile page
     const currUser = await getCurrentUser(req); // fetch user based on req
     if (currUser) {
         let userPosts = await db.all('SELECT * FROM posts WHERE username = ?', [currUser.username]);
-        userPosts = userPosts.slice().reverse();
-        res.render('profile', { posts: userPosts, user: currUser });
+        let userPostsWithReplies = await Promise.all(userPosts.map(async (post) => {
+            const replies = await db.all('SELECT * FROM replies WHERE repliedToId = ?', post.id);
+            return { ...post, replies };
+        }));
+        userPostsWithReplies = userPostsWithReplies.slice().reverse();
+        res.render('profile', { posts: userPostsWithReplies, user: currUser, regError });
     } else {
         res.redirect('/login');
     }
@@ -444,13 +586,31 @@ async function updatePostLikes(req, res) {
 }
 
 // Function to handle avatar generation and serving
-function handleAvatar(req, res) {
+async function handleAvatar(req, res) {
     // TODO: Generate and serve the user's avatar image
     const username = req.params.username;
-    const letter = username.charAt(0).toUpperCase();
-    const avatar = generateAvatar(letter);
-    res.set('Content-Type', 'image/png');
-    res.send(avatar);
+    try {
+        const user = await findUserByUsername(username);
+
+        if (user) {
+            if (user.avatar_url && !user.avatar_url.endsWith(user.username)) {
+                // Serve the custom avatar if it exists
+                const avatarPath = path.join(__dirname, 'public', user.avatar_url);
+                return res.sendFile(avatarPath);
+            } else {
+                // Generate and serve the default avatar
+                const letter = username.charAt(0).toUpperCase();
+                const avatar = generateAvatar(letter);
+                res.set('Content-Type', 'image/png');
+                return res.send(avatar);
+            }
+        } else {
+            return res.status(404).send('User not found');
+        }
+    } catch (error) {
+        console.error('Error handling avatar:', error);
+        return res.status(500).send('Internal Server Error');
+    }
 }
 
 // Function to get the current user from session
@@ -465,8 +625,21 @@ async function getCurrentUser(req) {
 
 // Function to get all posts, sorted by most recent first
 async function getPosts() {
-    const posts = await db.all('SELECT * FROM posts');
-    return posts.slice().sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    // const posts = await db.all('SELECT * FROM posts');
+    // return posts.slice().sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    try {
+        const posts = await db.all('SELECT * FROM posts');
+
+        const postsWithReplies = await Promise.all(posts.map(async (post) => {
+            const replies = await db.all('SELECT * FROM replies WHERE repliedToId = ?', post.id);
+            return { ...post, replies };
+        }));
+        
+        return postsWithReplies.slice().sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    } catch (error) {
+        console.error('Error fetching posts:', error);
+        return [];
+    }
 }
 
 async function getPostsSortedByLikes() {

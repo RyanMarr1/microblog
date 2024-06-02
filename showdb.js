@@ -45,6 +45,24 @@ async function showDatabaseContents() {
         console.log('Posts table does not exist.');
     }
 
+    // Check if the posts table exists
+    const repliesTableExists = await db.get(`SELECT name FROM sqlite_master WHERE type='table' AND name='replies';`);
+    if (repliesTableExists) {
+        console.log('Replies table exists.');
+        const replies = await db.all('SELECT * FROM replies');
+        if (replies.length > 0) {
+            console.log('Replies:');
+            replies.forEach(reply => {
+                console.log(reply);
+            });
+        } else {
+            console.log('No replies found.');
+        }
+    } else {
+        console.log('Replies table does not exist.');
+    }
+
+
     await db.close();
 }
 
