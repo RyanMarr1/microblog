@@ -2,17 +2,50 @@
 {{!< main }}
 
 <div class="profile-container">
-    <div class="profile-avatar">
-        <!-- Correct path for the default avatar image -->
-        <img src="avatar/{{user.username}}" alt="{{user.username}}'s avatar" class="pfp"/>
+    <div class = "ava-edit">
+        <div class="profile-avatar">
+            <!-- Correct path for the default avatar image -->
+            <img src="avatar/{{user.username}}" alt="{{user.username}}'s avatar" class="pfp"/> 
+        </div>
+        <button class="reglogbutton" id="icon-button" onclick="toggleEditIcon()">Change Icon</button>
+        <form id="change-icon" action="/profile/avatar" method="POST" enctype="multipart/form-data" style="display:none;">
+            <input type="file" name="myImage" accept="image/png, image/gif, image/jpeg, image/jpg" >
+            <button type="submit" class="reglogbutton">Save</button>
+            <button type="button" onclick="toggleEditIcon()" class="reglogbutton">Cancel</button>
+        </form>
     </div>
-    
-    <section class="profile-info">
-        <!-- user profile info -->
-        <h1>User Profile<h1>
-        <p> Username: {{user.username}}</p>
-        <p> Member Since: {{user.memberSince}}</p>
-    </section>
+    <div style = "display:flex flex-direction: column">    
+        <h1>𝅘𝅥𝅮 User Profile 𝅘𝅥𝅮<h1>
+        <section id="profile-info" class="profile-info">
+            <!-- user profile info -->
+            
+            <div id = "profile-text">
+                <p> Username: {{user.username}}</p>
+                <p> Bio: {{user.bio}}</p>
+                <p> Member Since: {{user.memberSince}}</p>
+                <button class = "reglogbutton" onclick="toggleEditInfo()">Edit Profile Info</button>   
+            </div>
+
+            {{#if regError}}
+                <p style="color: red;">{{regError}}</p>
+            {{/if}}
+            
+            <form id="edit-profile-form" action="/profile" method="POST" style="display:none;">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" value="{{user.username}}" pattern="[A-Za-z0-9]{5,}" required
+                    oninvalid="this.setCustomValidity('Username must be at least 5 characters long\n and must not contain special characters (ex. !@#$%^&*)')"
+                    oninput="this.setCustomValidity('')">
+                <br>
+                <label for="bio">Bio:</label>
+                <input type="text" id="bio" name="bio" value="{{user.bio}}">
+                <br>
+                <div>
+                    <button type="button" class = "reglogbutton" onclick="toggleEditInfo()">Cancel</button>
+                    <button type="submit" class="reglogbutton">Save Changes</button>
+                </div>  
+            </form>
+        </section>
+    </div>
 </div>
 
 <section class="user-posts">
@@ -31,3 +64,28 @@
         <p>You have not posted yet, poster.</p>
     {{/if}}
 </section>
+
+<script>
+    function toggleEditInfo() {
+        form = document.getElementById("edit-profile-form");
+        info = document.getElementById("profile-text");
+        if (form.style.display === "none") {
+            form.style.display = "flex";
+            info.style.display = "none";
+        } else {
+            form.style.display = "none";
+            info.style.display = "block";
+        }
+    }
+    function toggleEditIcon() {
+        form = document.getElementById("change-icon");
+        btn = document.getElementById("icon-button");
+        if (form.style.display === "none") {
+            form.style.display = "flex";
+            btn.style.display = "none";
+        } else {
+            btn.style.display = "inline-block";
+            form.style.display = "none";
+        }
+    }
+</script>
