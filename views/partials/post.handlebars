@@ -13,6 +13,9 @@
             <!-- everything that is shown in the status bar -->
             <!-- Heart = ♥ -->
             <!-- font awesome  trashcan = <i class="fas fa-trash-alt"> </i>-->
+            <span>
+                <a href="#" onclick="handleShowRepliesClick(event)" data-id="{{id}}" data-currUser="{{user.username}}">💬</a> <span>{{numReplies}}</span>
+            </span>
             {{#ifCond user.username username}}
                 <span>
                     <a href="#" onclick="handleDeleteClick(event)" data-id="{{id}}">🗑</a>
@@ -26,7 +29,39 @@
                 <span id="like-count">{{likes}}</span> <span> likes</span>
             </div>
             <small>Posted by {{username}} on {{timestamp}}</small>
-        </div>        
+        </div>
+        
+        <!-- Replies container -->
+        <div id="replies-container" style="display:none;">
+            {{#if replies.length}}
+            <ul>
+                {{#each replies}}
+                    {{> reply this user=../user replies=this.replies postId=id }}
+                {{/each}}
+            </ul>
+            {{else}}
+                <p>No replies available. Be the first to post!</p>
+            {{/if}}
+
+            {{#if loggedIn}}
+                <!-- show the create post form when logged in -->
+                <section class="post-form">
+                    <!-- make a header here -->
+                    <h2>Create a new reply</h2>
+                    <form action="/postReply" method="POST">
+                        <input type="hidden" id="postId" name="postId" value="{{postId}}">
+
+                        <div class="input-group">
+                            <textarea id="content" name="content" rows="5" placeholder="Type your reply" required></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="post-button">Post</button>
+                        </div>
+                    </form>
+                </section>
+            {{/if}}
+
+        </div>
     </div>
 </div>
 <script>
@@ -84,18 +119,34 @@
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
+            return response.text();
         })
         .then(message => {
             console.log(message);
+            const postContainer = event.target.closest(".post");
+            if (postContainer) {
+                postContainer.style.display = 'none';
+            }
         })
         .catch(error => {
             console.error('Error deleting post:', error);
         });
+    }
+    
+    function handleShowRepliesClick(event) {
+        event.preventDefault();
+        const container = event.target.closest(".post");
+        if (!container) return;
+        
+        const repliesContainer = container.querySelector('#replies-container');
 
-        const postContainer = event.target.closest(".post");
-        if (postContainer) {
-            postContainer.style.display = 'none';
+        if (repliesContainer.style.display === "none") {
+            repliesContainer.style.display = "block";
+        } else {
+            repliesContainer.style.display = "none";
         }
+        console.log("togglebutton reached")
+    }
 
-    }    
+
 </script>

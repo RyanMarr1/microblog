@@ -1,0 +1,48 @@
+<div class="post">
+    <div class="post-avatar">
+        <!-- the user's avatar -->
+        <img src="avatar/{{username}}" alt="{{username}}'s avatar" class="pfp-home"/>
+    </div>
+    <div class="post-content preserve-newlines">
+        <!-- the post -->
+            <h2>{{title}}</h2>
+            <p>{{content}}</p>
+        <hr>
+        <div class="post-status-bar">
+            {{!-- repliers username = {{username}} --}}
+            {{#ifCond user.username username}}
+                <span>
+                    <a href="#" onclick="handleDeleteReplyClick(event)" data-id="{{id}}">🗑</a>
+                </span>
+            {{/ifCond}}
+            <small>Posted by {{username}} on {{timestamp}}</small>
+        </div>
+    </div>
+</div>
+
+<script>
+    function handleDeleteReplyClick(event) {
+        event.preventDefault();
+        const replyId = event.target.getAttribute('data-id'); 
+      
+        fetch(`/deleteReply/${replyId}`, {
+            method: 'POST',
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.text();
+        })
+        .then(message => {
+            console.log(message);
+            const replyContainer = event.target.closest(".post");
+            if (replyContainer) {
+                replyContainer.style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting post:', error);
+        });
+    }
+</script>
