@@ -1,5 +1,5 @@
 header {
-  background-color: rgb(237, 67, 67);
+  background-color: rgb(128, 10, 183); /*rgb(237, 67, 67);*/
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -249,7 +249,7 @@ form {
 .post-status-bar{
 	display: flex;
 	flex-direction: row;
-	gap: 80px;
+	gap: 50px;
 	white-space: nowrap;
 }
 
@@ -320,6 +320,7 @@ form {
 }
 
 .profile-avatar{
+	width: 80px;
 	margin: 20px;
 }
 
@@ -329,7 +330,8 @@ form {
 	background-color: white;
 	border-radius: 8px;
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-	padding: 0 300px;
+	justify-content: center;
+	padding: 30px 300px;
 	margin: 0 20px;
 }
 
@@ -343,6 +345,14 @@ form {
 	white-space: nowrap;
 	font-size: 12pt;
 	font-weight: lighter;
+}
+
+#edit-profile-form{
+	display: none;
+	width: 100%;
+	height: auto;
+	align-items: center;
+	justify-content: center;
 }
 
 .user-posts{
@@ -411,5 +421,10 @@ a.liked, #likeBtn:hover {
 		background-color: white;
 		border-radius: 8px;
 		box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	}
+	.ava-edit{
+		display: flex;
+		flex-direction: column;
+		align-items:  center;
 	}
 }
