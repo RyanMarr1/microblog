@@ -39,25 +39,26 @@ async function initializeDB() {
             content TEXT NOT NULL,
             username TEXT NOT NULL,
             repliedToId INTEGER NOT NULL,
-            timestamp DATETIME NOT NULL,
-            FOREIGN KEY(repliedToId) REFERENCES posts(id) ON DELETE CASCADE
+            timestamp DATETIME NOT NULL
         );
     `);
 
     // Sample data - Replace these arrays with your own data
     const users = [
       { username: 'SampleUser', hashedGoogleId: '8d945a9691fae136b71eea807c440005ebecba389c5bc', avatar_url: '', memberSince: '2024-01-01 12:00:00'},
-      { username: 'AnotherUser', hashedGoogleId: '9a845a9791fae136b71eea807c440005ebecba389c5b', avatar_url: '', memberSince: '2024-01-02 12:00:00'}
+      { username: 'AnotherUser', hashedGoogleId: '9a845a9791fae136b71eea807c440005ebecba389c5b', avatar_url: '', memberSince: '2024-01-02 12:00:00'},
+      { username: 'OldHead', hashedGoogleId: '9a845a9791fae136b71eea807c440005ebecba389c4c', avatar_url: '', memberSince: '2024-01-02 12:00:00'}
     ];
   
     const posts = [
-        { title: 'First Post', content: 'This is the first post', username: 'SampleUser', timestamp: '2024-01-01 12:30:00', likes: 0 , likedBy: '[]' },
-        { title: 'Second Post', content: 'This is the second post', username: 'AnotherUser', timestamp: '2024-01-02 12:30:00', likes: 0 , likedBy: '[]' },
+        { title: 'New Drake album', content: 'i really like his new album', username: 'SampleUser', timestamp: '2024-01-01 12:30:00', likes: 0 , likedBy: '[]' },
+        { title: 'country music', content: 'country music is so bad', username: 'AnotherUser', timestamp: '2024-01-02 12:30:00', likes: 0 , likedBy: '[]' },
+        { title: 'New Music', content: 'this generation\'s music sucks!!', username: 'OldHead', timestamp: '2024-01-02 12:30:00', likes: 0 , likedBy: '[]' },
     ];
 
     const replies = [
-        { content: 'First reply to first post', username: 'AnotherUser', repliedToId: 1, timestamp: '2024-01-01 13:00:00' },
-        { content: 'Second reply to first post', username: 'SampleUser', repliedToId: 1, timestamp: '2024-01-01 13:05:00' }
+        { content: 'I think so too!', username: 'AnotherUser', repliedToId: 1, timestamp: '2024-01-01 13:00:00' },
+        { content: 'That\'s my favorite thing to listen to right now!', username: 'SampleUser', repliedToId: 1, timestamp: '2024-01-01 13:05:00' }
     ];
 
     // Insert sample data into the database

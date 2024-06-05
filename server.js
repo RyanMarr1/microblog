@@ -140,7 +140,7 @@ app.use(
 // should be used in your template files. 
 // 
 app.use((req, res, next) => {
-    res.locals.appName = 'RennyGram';
+    res.locals.appName = 'MusiGram';
     res.locals.copyrightYear = 2024;
     res.locals.postNeoType = 'Post';
     res.locals.loggedIn = req.session.loggedIn || false;
@@ -421,7 +421,9 @@ app.post('/delete/:id', isAuthenticated, async (req, res) => {
             return res.status(403).send('You are not allowed to delete other users\' posts');
         }
 
+        await db.run('DELETE FROM replies WHERE repliedToId = ?', [postId]); // delete replies from database
         await db.run('DELETE FROM posts WHERE id = ?', [postId]); // delete from database
+        
         res.send('Post successfully deleted');
     } catch (error) {
         console.error('Error deleting post:', error);
@@ -643,8 +645,14 @@ async function getPosts() {
 }
 
 async function getPostsSortedByLikes() {
+    // const posts = await db.all('SELECT * FROM posts');
     const posts = await db.all('SELECT * FROM posts');
-    return posts.slice().sort((a, b) => b.likes - a.likes);
+
+    const postsWithReplies = await Promise.all(posts.map(async (post) => {
+        const replies = await db.all('SELECT * FROM replies WHERE repliedToId = ?', post.id);
+        return { ...post, replies };
+    }));
+    return postsWithReplies.slice().sort((a, b) => b.likes - a.likes);
 }
 
 // Function to add a new post
